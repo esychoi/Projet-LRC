@@ -55,7 +55,10 @@ contenir  de  nombreuses  listes  imbriquées  récursivement.  flatten/2   extr
 éléments  contenus  dans  Liste1  et  stocke  le  résultat  dans  une  liste  "plane"  (à  une  seule
 dimension).*/
 
-
+/* Ajout dans Abil
+Si on a (I,and(C1,C2)), on ajoute (I,C1) et (I,C2) dans Abil,
+sinon on ajoute (I,C) directement ??????????*/
+/*ajout(Ctraite,Abi,Abil).*/
 /* Transformation en forme normale negative */
 nnf(not(and(C1,C2)),or(NC1,NC2)) :- nnf(not(C1),NC1), nnf(not(C2),NC2),!.
 nnf(not(or(C1,C2)),and(NC1,NC2)) :- nnf(not(C1),NC1), nnf(not(C2),NC2),!.
@@ -89,7 +92,8 @@ remplace_concepts_complexes(or(C1,C2),or(C1traite,C2traite)) :- remplace_concept
 remplace_concepts_complexes(some(R,C),some(R,Ctraite)) :- remplace_concepts_complexes(C,Ctraite), !.
 remplace_concepts_complexes(all(R,C),all(R,Ctraite)) :- remplace_concepts_complexes(C,Ctraite), !.
 
-/* Ajout dans Abil
-Si on a (I,and(C1,C2)), on ajoute (I,C1) et (I,C2) dans Abil,
-sinon on ajoute (I,C) directement ??????????*/
-/*ajout(Ctraite,Abi,Abil).*/
+/* ajout3((I,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) : selon la nature de C,
+ajoute (I,C) dans une des listes Lie,Lpt,Li,Lu,Ls et met le resultat dans Lie1,Lpt1,Li1,Lu1 ou Ls1. */
+ajout3((I,C),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1) :- concatene([(I,C)],Ls,Ls1).
+ajout3((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li1,Lu,Ls) :- concatene([(I,and(C1,C2))],Li,Li1).
+/*etc*/
