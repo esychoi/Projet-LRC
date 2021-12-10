@@ -1,13 +1,103 @@
 /* PROJET LRC - M1 DAC */
 /* ESTHER CHOI - GROUPE 1 */
 
-:- [utils].
+/* FONCTIONS UTILES*/
 
-compteur(1).
+/*member(X,L) : prédicat prédéfini, teste si l’élément X appartient à la liste L.*/
+
+/*concat/3 : concatene les deux listes L1 et L2 dans L3.*/
+concatene([],L1,L1).
+concatene([X|Y],L1,[X|L2]) :- concatene(Y,L1,L2).
+
+/*enleve/3 : supprime  X  de  la  liste  L1  et  renvoie  la  liste  résultante  dans  L2.*/
+enleve(X,[X|L],L) :-!.
+enleve(X,[Y|L],[Y|L2]) :- enleve(X,L,L2).
+
+/*genere/1 : génère un nouvel identificateur qui est fourni en sortie dans Nom.*/
+genere(Nom) :- compteur(V),nombre(V,L1),
+               concatene([105,110,115,116],L1,L2),
+               V1 is V+1,
+               dynamic(compteur/1),
+               retract(compteur(V)),
+               dynamic(compteur/1),
+               assert(compteur(V1)),nl,nl,nl,
+               name(Nom,L2).
+
+nombre(0,[]).
+nombre(X,L1) :- R is (X mod 10),
+                Q is ((X-R)//10),
+                chiffre_car(R,R1),
+                char_code(R1,R2),
+                nombre(Q,L),
+                concatene(L,[R2],L1).
+chiffre_car(0,'0').
+chiffre_car(1,'1').
+chiffre_car(2,'2').
+chiffre_car(3,'3').
+chiffre_car(4,'4').
+chiffre_car(5,'5').
+chiffre_car(6,'6').
+chiffre_car(7,'7').
+chiffre_car(8,'8').
+chiffre_car(9,'9').
+
+/*lecture/1 : permet  d’acquérir  au  clavier  la  liste  L  des  termes  Prolog  entrés  par
+l’utilisateur, de la façon suivante :
+l’utilisateur  entre  un  terme  Prolog  directement  suivi  d’un  point  et  d’un  retour  chariot  à  la
+vue  du  prompteur  et  ainsi  de  suite.  Lorsque  l’utilisateur  souhaite  interrompre  la  saisie  de
+termes, il doit taper fin, suivi d’un point et d’un retour chariot.*/
+
+lecture([X|L]):- read(X),
+                 X \= fin, !,
+                 lecture(L).
+lecture([]).
+
+/*flatten(Liste1,Liste2) : Aplanit Liste1 et met le résultat dans Liste2. Liste1 peut
+contenir  de  nombreuses  listes  imbriquées  récursivement.  flatten/2   extrait  tous  les
+éléments  contenus  dans  Liste1  et  stocke  le  résultat  dans  une  liste  "plane"  (à  une  seule
+dimension).*/
+
+/* --------------------------------------------------------------------------------------------------------------------------- */
 
 /* PARTIE 1 : PRELIMINAIRES */
 
-:- [td4exo3].
+equiv(sculpteur,and(personne,some(aCree,sculpture))).
+equiv(auteur,and(personne,some(aEcrit,livre))).
+equiv(editeur,and(personne,and(not(some(aEcrit,livre)),some(aEdite,livre)))).
+equiv(parent,and(personne,some(aEnfant,anything))).
+
+cnamea(personne).
+cnamea(livre).
+cnamea(objet).
+cnamea(sculpture).
+cnamea(anything).
+cnamea(nothing).
+
+cnamena(auteur).
+cnamena(editeur).
+cnamena(sculpteur).
+cnamena(parent).
+
+iname(michelAnge).
+iname(david).
+iname(sonnets).
+iname(vinci).
+iname(joconde).
+
+rname(aCree).
+rname(aEcrit).
+rname(aEdite).
+rname(aEnfant).
+
+inst(michelAnge,personne).
+inst(david,sculpteur).
+inst(sonnets,livre).
+inst(vinci,personne).
+inst(joconde,objet).
+
+instR(michelAnge,david,aCree).
+instR(michelAnge,sonnets,aEcrit).
+instR(vinci,joconde,aCree).
 
 /*TBox :
 [(sculpteur,and(personne,some(aCree,sculpture))), (auteur,and(personne,some(aEcrit,livre))), (editeur,and(personne,and(not(some(aEcrit,livre)),some(aEdite,livre)))), (parent,and(personne,some(aEnfant,anything)))]
@@ -21,10 +111,11 @@ compteur(1).
 */
 
 
+compteur(1).
 
 programme :- premiere_etape(Tbox,Abi,Abr),
-             deuxieme_etape(Abi,Abil,Tbox),
-             troisieme_etape(Abil,Abr).
+             deuxieme_etape(Abi,Abi1,Tbox),
+             troisieme_etape(Abi1,Abr).
 
 /*Paramètres
 - premiere_etape :
@@ -33,10 +124,10 @@ programme :- premiere_etape(Tbox,Abi,Abr),
   Abr = liste représentant les assertions de rôles de la ABox
 - deuxieme_etape :
   Abi = liste des assertions de concepts initiales
-  Abil = liste des assertions de concepts complétée après la soumission d'une proposition a demontrer
+  Abi1 = liste des assertions de concepts complétée après la soumission d'une proposition a demontrer
   Tbox = liste représentant la TBox
 - troisieme_etape :
-  Abil = liste des assertions de concepts complétée
+  Abi1 = liste des assertions de concepts complétée
   Abr =  liste des assertions de rôles qui peut également évoluer lors de la démonstration
 */
 
@@ -49,46 +140,87 @@ premiere_etape(
 
 /* PARTIE 2 : SAISIE DE LA PROPOSITION A DEMONTRER */
 
-deuxieme_etape(Abi,Abil,Tbox) :-
-  saisie_et_traitement_prop_a_demontrer(Abi,Abil,Tbox).
+deuxieme_etape(Abi,Abi1,Tbox) :-
+  saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox).
 
-saisie_et_traitement_prop_a_demontrer(Abi,Abil,Tbox) :-
+saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox) :-
   nl, write('Entrez le numero du type de proposition que vous voulez demontrer :'), nl,
   write('1 = Une instance donnee appartient a un concept donne.'), nl,
   write('2 = Deux concepts n"ont pas d"elements en commun (ils ont une intersection vide).'), nl,
-  read(R), suite(R,Abi,Abil,Tbox).
+  read(R), suite(R,Abi,Abi1,Tbox).
 
-suite(1,Abi,Abil,Tbox) :- acquisition_prop_type1(Abi,Abil,Tbox),!.
-suite(2,Abi,Abil,Tbox) :- acquisition_prop_type2(Abi,Abil,Tbox),!.
-suite(R,Abi,Abil,Tbox) :- nl, write('Cette reponse est incorrecte'),nl,
-  saisie_et_traitement_prop_a_demontrer(Abi,Abil,Tbox).
+suite(1,Abi,Abi1,Tbox) :- acquisition_prop_type1(Abi,Abi1,Tbox),!.
+suite(2,Abi,Abi1,Tbox) :- acquisition_prop_type2(Abi,Abi1,Tbox),!.
+suite(R,Abi,Abi1,Tbox) :- nl, write('Cette reponse est incorrecte'),nl,
+  saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox).
 
 
-acquisition_prop_type1(Abi,Abil,Tbox) :-
-  nl, write('Entrez la proposition a montrer :'), nl,
-  read(P), /*format : (I,C) où I est une instance et C un concept existants. */
+acquisition_prop_type1(Abi,Abi1,Tbox) :-
+  nl, write("Entrez la proposition a montrer (d'abord l'instance, puis le concept, puis tapez 'fin.') :"), nl,
+  lecture(P), /*P = [I,C] où I est une instance I et C un concept existants*/
   correction(P),  /*verification syntaxique et semantique*/
-  traitement(P,Ptraitennf), /*P=(I,C), Ctraitennf = nnf de not(C)*/
-  ajout(Ptraitennf,Abi,Abil). /*ajout dans Abil*/
+  traitement(P,Ptraitennf), /*P=[I,C], Ctraitennf = nnf de not(C)*/
+  ajout(Ptraitennf,Abi,Abi1). /*ajout dans Abi1*/
 
-correction((I,C)) :- iname(I),concept(C).
-traitement((I,C),(I,Ctraitennf)) :- remplace_concepts_complexes(C,Ctraite),
+/* Transformation en forme normale negative */
+nnf(not(and(C1,C2)),or(NC1,NC2)) :- nnf(not(C1),NC1), nnf(not(C2),NC2),!.
+nnf(not(or(C1,C2)),and(NC1,NC2)) :- nnf(not(C1),NC1), nnf(not(C2),NC2),!.
+nnf(not(all(R,C)),some(R,NC)) :- nnf(not(C),NC),!.
+nnf(not(some(R,C)),all(R,NC)) :- nnf(not(C),NC),!.
+nnf(not(not(X)),X) :- !.
+nnf(not(X),not(X)) :- !.
+nnf(and(C1,C2),and(NC1,NC2)) :- nnf(C1,NC1),nnf(C2,NC2),!.
+nnf(or(C1,C2),or(NC1,NC2)) :- nnf(C1,NC1), nnf(C2,NC2),!.
+nnf(some(R,C),some(R,NC)) :- nnf(C,NC),!.
+nnf(all(R,C),all(R,NC)) :- nnf(C,NC),!.
+nnf(X,X).
+
+/* Verification syntaxique et semantique */
+concept([not(C)|_]) :- concept([C]),!.
+concept([and(C1,C2)|_]) :- concept([C1]),concept([C2]),!.
+concept([or(C1,C2)|_]) :- concept([C1]),concept([C2]),!.
+concept([some(R,C)|_]) :- rname(R),concept([C]),!.
+concept([all(R,C)|_]) :- rname(R),concept([C]),!.
+concept([C|_]) :- setof(X,cnamea(X),L),member(C,L),!.
+concept([C|_]) :- setof(X,cnamena(X),L),member(C,L),!.
+
+/* Remplacement des concepts complexes par leur definition equivalente en nnf */
+
+remplace_concepts_complexes([not(C)|_],not(Ctraite)) :- remplace_concepts_complexes([C],Ctraite).
+remplace_concepts_complexes([and(C1,C2)|_],and(C1traite,C2traite)) :- remplace_concepts_complexes([C1],C1traite),
+                                                                  remplace_concepts_complexes([C2],C2traite), !.
+remplace_concepts_complexes([or(C1,C2)|_],or(C1traite,C2traite)) :- remplace_concepts_complexes([C1],C1traite),
+                                                                remplace_concepts_complexes([C2],C2traite), !.
+remplace_concepts_complexes([some(R,C)|_],some(R,Ctraite)) :- remplace_concepts_complexes([C],Ctraite), !.
+remplace_concepts_complexes([all(R,C)|_],all(R,Ctraite)) :- remplace_concepts_complexes([C],Ctraite), !.
+remplace_concepts_complexes([C|_],C) :- cnamea(C), !.
+remplace_concepts_complexes([C|_],Ctraite) :- cnamena(C),equiv(C,Ctraite), !.
+
+correction([I|C]) :- iname(I),concept(C).
+
+traitement([I|C],(I,Ctraitennf)) :- remplace_concepts_complexes(C,Ctraite),
                                     nnf(not(Ctraite),Ctraitennf).
-ajout(Ptraitennf,Abi,Abil) :- concatene([Ptraitennf],Abi,Abil).
+
+ajout(Ptraitennf,Abi,Abi1) :- concatene([Ptraitennf],Abi,Abi1).
 
 
-acquisition_prop_type2(Abi,Abil,Tbox) :-
-  nl, write('Entrez la proposition a montrer (usage : `(concept1,concept2)`) :'), nl,
-  read(P), /*format : (C1,C2) où C1 et C2 sont des concepts. */
+acquisition_prop_type2(Abi,Abi1,Tbox) :-
+  nl, write("Entrez la proposition a montrer (d'abord le premier concept, puis le second, puis tapez 'fin.') :"), nl,
+  lecture(P), /*P=[C1,C2] où C1 et C2 sont des concepts. */
   correction2(P),  /*verification syntaxique et semantique*/
-  traitement2(P,Ptraite), /*P=(C1,C2), Ptraite = P où on a remplacé les concepts complexes par leur définition*/
-  ajout2(Ptraite,Abi,Abil). /*ajout dans Abil*/
+  traitement2(P,Ptraite), /*P=[C1,C2], Ptraite = P où on a remplacé les concepts complexes par leur définition*/
+  ajout2(Ptraite,Abi,Abi1). /*ajout dans Abi1*/
 
-correction2((C1,C2)) :- concept(C1),concept(C2).
-traitement2((C1,C2),(C1traite,C2traite)) :- remplace_concepts_complexes(C1,C1traite),
-                                            remplace_concepts_complexes(C2,C2traite).
-ajout2((C1traite,C2traite),Abi,Abil) :- genere(Nom),
-                                        concatene([(Nom,and(C1traite,C2traite))],Abi,Abil).
+correction2([]).
+correction2([C1|C2]) :- concept([C1]),correction2(C2).
+
+traitement2([],(_,_)).
+traitement2([C2],(_,C2traite)) :- remplace_concepts_complexes([C2],C2traite), !.
+traitement2([C1|C2],(C1traite,C2traite)) :- remplace_concepts_complexes([C1],C1traite),
+                                            traitement2(C2,(C1traite,C2traite)).
+
+ajout2((C1traite,C2traite),Abi,Abi1) :- genere(Nom),
+                                        concatene([(Nom,and(C1traite,C2traite))],Abi,Abi1).
 
 
 /* PARTIE 3 : DEMONSTRATION DE LA PROPOSITION */
@@ -106,29 +238,31 @@ tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,Ls) :- concatene([(I,C)],Ls,LsNew), tri_Abox(T,
 tri_Abox([(I,not(C))|T],Lie,Lpt,Li,Lu,Ls) :- concatene([(I,not(C))],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,LsNew). /*not(concept) -> Ls*/
 
 
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- complete_some(Lie,Lpt,Li,Lu,Ls,Abr), /*règle il existe*/
+                                    transformation_and(Lie,Lpt,Li,Lu,Ls,Abr), /*règle et*/
+                                    deduction_all(Lie,Lpt,Li,Lu,Ls,Abr), /*règle pour tout*/
+                                    transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
 
+
+/*Defnir evolue*/
 
 complete_some([(I,some(R,C))|Tie],Lpt,Li,Lu,Ls,Abr) :- genere(B), /*on cree un nouvel objet B*/
                                                        concatene([(I,B,R)],Abr,AbrNew), /*on ajoute (I,B,R) dans Abr*/
-                                                       ajout3((B,C),Tie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1), /*l'ajout de (B,C) depend de la nature de C*/
+                                                       evolue((B,C),Tie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1), /*l'ajout de (B,C) depend de la nature de C*/
                                                        test_clash(Lie1,Lpt1,Li1,Lu1,Ls1,AbrNew), /*on regarde s'il y a un clash*/
                                                        resolution(Lie1,Lpt1,Li1,Lu1,Ls1,AbrNew). /*s'il n'y a pas de clash, on boucle*/
 
-transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- ajout3((I,C1),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
-                                                             ajout3((I,C2),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
+transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- evolue((I,C1),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
+                                                             evolue((I,C2),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
                                                              test_clash(Lie1,Lpt1,Li1,Lu1,Ls1,Abr),
                                                              resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
 
 deduction_all(Lie,Lpt,Li,Lu,Ls,Abr) :- presence_all(Lpt,Abr,(I,all(R,C)),(I,B,R)), /*on teste la presence d'un (I,all(R,C)) dans Lpt et d'un (I,B,R) dans Abr*/
-                                       ajout3((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
+                                       evolue((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
                                        test_clash(Lie1,Lpt1,Li1,Lu1,Ls1,Abr),
                                        resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
 
-transformation_or(Lie,Lpt,Li,[(I,or(C1,C2))|Tu],Ls,Abr) :- ajout3((I,C1),Lie,Lpt,Li,Lu,Ls,Lie1g,Lpt1g,Li1g,Lu1g,Ls1g), /*ajout fils gauche*/
-                                                           ajout3((I,C2),Lie,Lpt,Li,Lu,Ls,Lie1d,Lpt1d,Li1d,Lu1d,Ls1d), /*ajout fils droit*/
+transformation_or(Lie,Lpt,Li,[(I,or(C1,C2))|Tu],Ls,Abr) :- evolue((I,C1),Lie,Lpt,Li,Lu,Ls,Lie1g,Lpt1g,Li1g,Lu1g,Ls1g), /*ajout fils gauche*/
+                                                           evolue((I,C2),Lie,Lpt,Li,Lu,Ls,Lie1d,Lpt1d,Li1d,Lu1d,Ls1d), /*ajout fils droit*/
                                                            resolution(Lie1g,Lpt1g,Li1g,Lu1g,Ls1g,Abr), /*fils gauche*/
                                                            resolution(Lie1d,Lpt1d,Li1d,Lu1d,Ls1d,Abr). /*fils droit*/
