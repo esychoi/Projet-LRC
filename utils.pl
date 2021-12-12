@@ -28,6 +28,11 @@ nombre(X,L1) :- R is (X mod 10),
                 char_code(R1,R2),
                 nombre(Q,L),
                 concatene(L,[R2],L1).
+
+nonmember(Arg,[Arg|_]) :- !,fail.
+nonmember(Arg,[_|Tail]) :- !, nonmember(Arg,Tail).
+nonmember(_,[]).
+
 chiffre_car(0,'0').
 chiffre_car(1,'1').
 chiffre_car(2,'2').
