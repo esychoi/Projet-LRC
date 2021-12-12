@@ -243,34 +243,41 @@ tri_Abox([(I,or(C1,C2))|T],Lie,Lpt,Li,LuNew,Ls) :- concatene([(I,or(C1,C2))],Lu,
 tri_Abox([(I,not(C))|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,not(C))],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*not(concept) -> Ls*/
 tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,C)],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*concept -> Ls*/
 
-/*affiche/1: predicat qui affiche une liste d'assertions*/
-affiche([]).
-affiche([(I,some(R,C))|T]) :- write("("), write(I),write(" : "),write("∃"),write(R), write("."), write(C),write(") , "), affiche(T),!.
-affiche([(I,all(R,C))|T]) :-  write("("),write(I),write(" : "),write("∀"),write(R), write("."), write(C),write(") , "), affiche(T),!.
-affiche([(I,and(C1,C2))|T]) :- write("("),write(I), write(" : "), write(C1), write(" ⊓ "), write(C2),write(") , "), affiche(T),!.
-affiche([(I,or(C1,C2))|T]) :- write("("),write(I), write(" : "), write(C1), write(" ⊔ "), write(C2),write(") , "), affiche(T),!.
-affiche([(I,not(C))|T]) :- write("("),write(I), write(" : "), write("¬ "), write(C),write(") , "), affiche(T),!.
-affiche([(I,C)|T]) :- write("("),write(I),write(" : "),write(C),write(") , "), affiche(T),!.
-
 
 /*affiche_evolution_Abox/12 : Affiche l'évolution de la Abox étendue*/
-affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu2, Abr2):- write("État de départ de la Abox:"),nl,
-                                                                                           write("Ls = "), affiche(Ls1), nl,
-                                                                                           write("Lie = "), affiche(Lie1), nl,
-                                                                                           write("Lpt = "), affiche(Lpt1), nl,
-                                                                                           write("Li = "), affiche(Li1), nl,
-                                                                                           write("Lu = "), affiche(Lu1), nl,
-                                                                                           write("Abr = "), affiche(Abr1),
-                                                                                           nl,
-                                                                                           write("------>"),
-                                                                                           write("Etat d'arrivée:"),
-                                                                                           write("Ls = "), affiche(Ls2), nl,
-                                                                                           write("Lie = "), affiche(Lie2), nl,
-                                                                                           write("Lpt = "), affiche(Lpt2), nl,
-                                                                                           write("Li = "), affiche(Li2), nl,
-                                                                                           write("Lu = "), affiche(Lu2), nl,
-                                                                                           write("Abr = "), affiche(Abr2),
-                                                                                           write("=======FIN========"),nl.
+affiche_evolution_Abox(Ls, Lie, Lpt, Li, Lu, Abr, Ls1, Lie1, Lpt1, Li1, Lu1, Abr1) :- write("---État de départ de la Abox---"),nl,
+                                                                                      affiche(Ls),
+                                                                                      affiche(Lie),
+                                                                                      affiche(Lpt),
+                                                                                      affiche(Li),
+                                                                                      affiche(Lu),
+                                                                                      affiche(Abr),
+                                                                                      nl,write("---Etat d'arrivée---"),nl,
+                                                                                      affiche(Ls1),
+                                                                                      affiche(Lie1),
+                                                                                      affiche(Lpt1),
+                                                                                      affiche(Li1),
+                                                                                      affiche(Lu1),
+                                                                                      affiche(Abr1),
+                                                                                      nl,write("=======FIN========"),nl,!.
+
+/*affiche/1: predicat qui affiche une liste d'assertions*/
+affiche([]).
+affiche([A|L]):- affiche(A),affiche(L).
+
+affiche((A,B,R)) :- nl,write("<"),write(A),write(","),write(B),write("> : "),write(R).
+
+
+affiche((I,or(C1,C2))) :- nl,write(I),write(" : "), affiche(C1),write(" ⊔ "),affiche(C2).
+affiche((I,and(C1,C2))) :- nl,write(I),write(" : "), affiche(C1),write(" ⊓ "),affiche(C2).
+affiche((I,C)) :- nl,write(I), write(" : "), affiche(C).
+
+affiche(or(C1,C2)) :- write("("),affiche(C1),write(" ⊔ "),affiche(C2),write(")").
+affiche(and(C1,C2)) :- write("("),affiche(C1),write(" ⊓ "),affiche(C2),write(")").
+affiche(all(R,C)) :- write("∀"),write(R),write("."),affiche(C).
+affiche(some(R,C)) :- write("∃"), write(R), write("."), affiche(C).
+affiche(not(C)) :- write("¬"),affiche(C).
+affiche(C) :- write(C).
 
 /* test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
 test_clash(L):- test_clash_rec(L,L).
