@@ -95,7 +95,7 @@ rname(aEdite).
 rname(aEnfant).
 
 inst(michelAnge,personne).
-inst(david,sculpteur).
+inst(david,sculpture).
 inst(sonnets,livre).
 inst(vinci,personne).
 inst(joconde,objet).
@@ -232,7 +232,7 @@ ajout2((C1traite,C2traite),Abi,Abi1) :- genere(Nom),
 /* PARTIE 3 : DEMONSTRATION DE LA PROPOSITION */
 
 troisieme_etape(Abi,Abr) :- tri_Abox(Abi,Lie,Lpt,Li,Lu,Ls),
-                            \+ resolution(Lie,Lpt,Li,Lu,Ls,Abr),
+                            resolution(Lie,Lpt,Li,Lu,Ls,Abr),
                             nl, write('Youpiiiiii, on a demontre la proposition initiale !!!').
 
 tri_Abox([],[],[],[],[],[]). /*cas d'arrêt*/
@@ -272,17 +272,16 @@ affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu
                                                                                            affiche(Abr2),
                                                                                            write("=======FIN========"),nl.
 
-/*TODO : test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
+/* test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
 test_clash(L):- test_clash_rec(L,L).
 test_clash_rec([],L). % cas de base
 test_clash_rec([(I,C)|T], L) :- nnf(not(C),Neg), nonmember((I, Neg), L), test_clash_rec(T,L).
 
-resolution([],[],[],[],Ls,Abr) :- \+ test_clash(Ls).
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
-
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lie,0)), write("Résol IE \n"),  complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Li,0)), write("Résol AND \n"), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), not(length(Lpt,0)), write("Résol ALL \n"),  deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lu,0)), write("Résol OR \n"), transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
+resolution([],[],[],[],Ls,Abr) :-  not(test_clash(Ls)).
 
 /*evolue/11 : màj des listes de Abe*/
 evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,some(R,C))],Lie,Lie1),!.
