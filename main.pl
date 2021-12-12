@@ -241,10 +241,10 @@ tri_Abox([(I,all(R,C))|T],Lie,LptNew,Li,Lu,Ls) :- concatene([(I,all(R,C))],Lpt,L
 tri_Abox([(I,and(C1,C2))|T],Lie,Lpt,LiNew,Lu,Ls) :- concatene([(I,and(C1,C2))],Li,LiNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*and -> Li*/
 tri_Abox([(I,or(C1,C2))|T],Lie,Lpt,Li,LuNew,Ls) :- concatene([(I,or(C1,C2))],Lu,LuNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*or -> Lu*/
 tri_Abox([(I,not(C))|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,not(C))],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*not(concept) -> Ls*/
-tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,C)],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*concept -> Ls*/      
+tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,C)],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*concept -> Ls*/
 
 /*affiche/1: predicat qui affiche une liste d'assertions*/
-affiche([]):- write("fin affichage.\n").
+affiche([]).
 affiche([(I,some(R,C))|T]) :- write("("), write(I),write(" : "),write("∃"),write(R), write("."), write(C),write(") , "), affiche(T),!.
 affiche([(I,all(R,C))|T]) :-  write("("),write(I),write(" : "),write("∀"),write(R), write("."), write(C),write(") , "), affiche(T),!.
 affiche([(I,and(C1,C2))|T]) :- write("("),write(I), write(" : "), write(C1), write(" ⊓ "), write(C2),write(") , "), affiche(T),!.
@@ -255,21 +255,21 @@ affiche([(I,C)|T]) :- write("("),write(I),write(" : "),write(C),write(") , "), a
 
 /*affiche_evolution_Abox/12 : Affiche l'évolution de la Abox étendue*/
 affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu2, Abr2):- write("État de départ de la Abox:"),nl,
-                                                                                           affiche(Ls1),
-                                                                                           affiche(Lie1),
-                                                                                           affiche(Lpt1),
-                                                                                           affiche(Li1),
-                                                                                           affiche(Lu1),
-                                                                                           affiche(Abr1),
+                                                                                           write("Ls = "), affiche(Ls1), nl,
+                                                                                           write("Lie = "), affiche(Lie1), nl,
+                                                                                           write("Lpt = "), affiche(Lpt1), nl,
+                                                                                           write("Li = "), affiche(Li1), nl,
+                                                                                           write("Lu = "), affiche(Lu1), nl,
+                                                                                           write("Abr = "), affiche(Abr1),
                                                                                            nl,
                                                                                            write("------>"),
                                                                                            write("Etat d'arrivée:"),
-                                                                                           affiche(Ls2),
-                                                                                           affiche(Lie2),
-                                                                                           affiche(Lpt2),
-                                                                                           affiche(Li2),
-                                                                                           affiche(Lu2),
-                                                                                           affiche(Abr2),
+                                                                                           write("Ls = "), affiche(Ls2), nl,
+                                                                                           write("Lie = "), affiche(Lie2), nl,
+                                                                                           write("Lpt = "), affiche(Lpt2), nl,
+                                                                                           write("Li = "), affiche(Li2), nl,
+                                                                                           write("Lu = "), affiche(Lu2), nl,
+                                                                                           write("Abr = "), affiche(Abr2),
                                                                                            write("=======FIN========"),nl.
 
 /* test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
@@ -277,19 +277,19 @@ test_clash(L):- test_clash_rec(L,L).
 test_clash_rec([],L). % cas de base
 test_clash_rec([(I,C)|T], L) :- nonmember((I, not(C)), L), test_clash_rec(T,L).
 
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lie,0)), write("Résol IE \n"),  complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Li,0)), write("Résol AND \n"), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), not(length(Lpt,0)), write("Résol ALL \n"),  deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lu,0)), write("Résol OR \n"), transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- not(length(Lie,0)), test_clash(Ls), write("Résol IE \n"),  complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- not(length(Li,0)), test_clash(Ls), write("Résol AND \n"), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- not(length(Lpt,0)), test_clash(Ls), write("Résol ALL \n"),  deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- not(length(Lu,0)), test_clash(Ls), write("Résol OR \n"), transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
 resolution([],[],[],[],Ls,Abr) :-  not(test_clash(Ls)).
 
 /*evolue/11 : màj des listes de Abe*/
-evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,some(R,C))],Lie,Lie1),!.
-evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,and(C1,C2))],Li,Li1),!.
-evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
-evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
-evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,not(C))],Ls,Ls1),!.
-evolue((I,C),_,_,_,_,Ls,_,_,_,_,Ls1) :- concatene([(I,C)],Ls,Ls1),!.
+evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt,Li,Lu,Ls) :- concatene([(I,some(R,C))],Lie,Lie1),!.
+evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li1,Lu,Ls) :- concatene([(I,and(C1,C2))],Li,Li1),!.
+evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu1,Ls) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
+evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt1,Li,Lu,Ls) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
+evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1) :- nnf(not(C),NotCnnf),concatene([(I,NotCnnf)],Ls,Ls1),!.
+evolue((I,C),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1) :- concatene([(I,C)],Ls,Ls1),!.
 
 
 %complete_some([],Lpt,Li,Lu,Ls,Abr).
@@ -303,7 +303,8 @@ complete_some([(I,some(R,C))|Tie],Lpt,Li,Lu,Ls,Abr) :- write("====complete some=
 transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- write("====transformation and===\n"),
                                                              evolue((I,C1),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
                                                              evolue((I,C2),Lie1,Lpt1,Li1,Lu1,Ls1,Lie2,Lpt2,Li2,Lu2,Ls2),
-                                                             resolution(Lie2,Lpt2,Li2,Lu2,Ls2,Abr).
+                                                             affiche_evolution_Abox(Ls,Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Abr,Ls2,Lie2,Lpt2,Li2,Lu2,Abr),
+                                                             not(resolution(Lie2,Lpt2,Li2,Lu2,Ls2,Abr)).
 
 
 presence_all((I,B,R),Abr):- member((I,B,R), Abr),!.
@@ -318,7 +319,7 @@ deduction_all(Lie,[(I,all(R,C))|Lpt],Li,Lu,Ls,Abr) :- write("====deduction all==
 
 %transformation_or(_,_,_,[],_,_).
 transformation_or(Lie,Lpt,Li,[(I,or(C1,C2))|Tu],Ls,Abr) :- write("====transformation or===\n"),
-                                                           evolue((I,C1),Lie,Lpt,Li,Tu,Ls,Lie1g,Lpt1g,Li1g,Lu1g,Ls1g), /*ajout fils gauche*/
-                                                           evolue((I,C2),Lie,Lpt,Li,Tu,Ls,Lie1d,Lpt1d,Li1d,Lu1d,Ls1d), /*ajout fils droit*/
-                                                           resolution(Lie1g,Lpt1g,Li1g,Lu1g,Ls1g,Abr), /*fils gauche*/
-                                                           resolution(Lie1d,Lpt1d,Li1d,Lu1d,Ls1d,Abr). /*fils droit*/
+                                                          evolue((I,C1),Lie,Lpt,Li,Tu,Ls,Lie1g,Lpt1g,Li1g,Lu1g,Ls1g), /*ajout fils gauche*/
+                                                          evolue((I,C2),Lie,Lpt,Li,Tu,Ls,Lie1d,Lpt1d,Li1d,Lu1d,Ls1d), /*ajout fils droit*/
+                                                          resolution(Lie1g,Lpt1g,Li1g,Lu1g,Ls1g,Abr), /*fils gauche*/
+                                                          resolution(Lie1d,Lpt1d,Li1d,Lu1d,Ls1d,Abr). /*fils droit*/
