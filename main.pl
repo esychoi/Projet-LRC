@@ -156,7 +156,7 @@ saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox) :-
 
 suite(1,Abi,Abi1,Tbox) :- acquisition_prop_type1(Abi,Abi1,Tbox),!.
 suite(2,Abi,Abi1,Tbox) :- acquisition_prop_type2(Abi,Abi1,Tbox),!.
-suite(R,Abi,Abi1,Tbox) :- nl, write('Cette reponse est incorrecte'),nl,
+suite(_,Abi,Abi1,Tbox) :- nl, write('Cette reponse est incorrecte'),nl,
   saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox).
 
 
@@ -274,7 +274,7 @@ affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu
 
 /* test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
 test_clash(L):- test_clash_rec(L,L).
-test_clash_rec([],L). % cas de base
+test_clash_rec([],_). % cas de base
 test_clash_rec([(I,C)|T], L) :- nonmember((I, not(C)), L), test_clash_rec(T,L).
 
 resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- not(length(Lie,0)), test_clash(Ls), write("Résol IE \n"),  complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
@@ -314,7 +314,6 @@ deduction_all(Lie,[(I,all(R,C))|Lpt],Li,Lu,Ls,Abr) :- write("====deduction all==
                                                       write(Ls),
                                                       member((I,B,R),Abr),
                                                       evolue((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
-                                                      write(Ls1),
                                                       resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
 
 %transformation_or(_,_,_,[],_,_).
