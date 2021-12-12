@@ -156,7 +156,7 @@ saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox) :-
 
 suite(1,Abi,Abi1,Tbox) :- acquisition_prop_type1(Abi,Abi1,Tbox),!.
 suite(2,Abi,Abi1,Tbox) :- acquisition_prop_type2(Abi,Abi1,Tbox),!.
-suite(R,Abi,Abi1,Tbox) :- nl, write('Cette reponse est incorrecte'),nl,
+suite(_,Abi,Abi1,Tbox) :- nl, write('Cette reponse est incorrecte'),nl,
   saisie_et_traitement_prop_a_demontrer(Abi,Abi1,Tbox).
 
 
@@ -274,22 +274,22 @@ affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu
 
 /* test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
 test_clash(L):- test_clash_rec(L,L).
-test_clash_rec([],L). % cas de base
+test_clash_rec([],_). % cas de base
 test_clash_rec([(I,C)|T], L) :- nonmember((I, not(C)), L), test_clash_rec(T,L).
 
 resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lie,0)), write("Résol IE \n"),  complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
 resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Li,0)), write("Résol AND \n"), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), not(length(Lpt,0)), write("Résol ALL \n"),  deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lpt,0)), write("Résol ALL \n"), deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
 resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lu,0)), write("Résol OR \n"), transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
-resolution([],[],[],[],Ls,Abr) :-  not(test_clash(Ls)).
+resolution([],[],[],[],Ls,Abr) :- write("Résol VIDE\n"),  not(test_clash(Ls)).
 
 /*evolue/11 : màj des listes de Abe*/
-evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,some(R,C))],Lie,Lie1),!.
-evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,and(C1,C2))],Li,Li1),!.
-evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
-evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
-evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,not(C))],Ls,Ls1),!.
-evolue((I,C),_,_,_,_,Ls,_,_,_,_,Ls1) :- concatene([(I,C)],Ls,Ls1),!.
+evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt,Li,Lu,Ls) :- concatene([(I,some(R,C))],Lie,Lie1),!.
+evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li1,Lu,Ls) :- concatene([(I,and(C1,C2))],Li,Li1),!.
+evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu1,Ls) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
+evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt1,Li,Lu,Ls) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
+evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1) :- concatene([(I,not(C))],Ls,Ls1),!.
+evolue((I,C),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1):- concatene([(I,C)],Ls,Ls1),!.
 
 
 %complete_some([],Lpt,Li,Lu,Ls,Abr).
@@ -303,6 +303,9 @@ complete_some([(I,some(R,C))|Tie],Lpt,Li,Lu,Ls,Abr) :- write("====complete some=
 transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- write("====transformation and===\n"),
                                                              evolue((I,C1),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
                                                              evolue((I,C2),Lie1,Lpt1,Li1,Lu1,Ls1,Lie2,Lpt2,Li2,Lu2,Ls2),
+                                                             write("AFfichage de LS2 T ANd \n"),
+                                                             write(Ls2),
+                                                             write(Lpt2),
                                                              resolution(Lie2,Lpt2,Li2,Lu2,Ls2,Abr).
 
 
@@ -313,7 +316,6 @@ deduction_all(Lie,[(I,all(R,C))|Lpt],Li,Lu,Ls,Abr) :- write("====deduction all==
                                                       write(Ls),
                                                       member((I,B,R),Abr),
                                                       evolue((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
-                                                      write(Ls1),
                                                       resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
 
 %transformation_or(_,_,_,[],_,_).
