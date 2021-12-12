@@ -139,7 +139,7 @@ programme :- premiere_etape(Tbox,Abi,Abr),
 premiere_etape(
   [(sculpteur,and(personne,some(aCree,sculpture))), (auteur,and(personne,some(aEcrit,livre))), (editeur,and(personne,and(not(some(aEcrit,livre)),some(aEdite,livre)))), (parent,and(personne,some(aEnfant,anything)))],
   [(michelAnge,personne), (david,sculpture), (sonnets,livre), (vinci,personne), (joconde,objet)],
-  [(michelAnge, david, aCree), (michelAnge, sonnet, aEcrit),(vinci, joconde, aCree)]
+  [(michelAnge, david, aCree), (michelAnge, sonnets, aEcrit),(vinci, joconde, aCree)]
 ).
 
 
@@ -275,7 +275,7 @@ affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu
 /* test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
 test_clash(L):- test_clash_rec(L,L).
 test_clash_rec([],L). % cas de base
-test_clash_rec([(I,C)|T], L) :- nnf(not(C),Neg), nonmember((I, Neg), L), test_clash_rec(T,L).
+test_clash_rec([(I,C)|T], L) :- nonmember((I, not(C)), L), test_clash_rec(T,L).
 
 resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Lie,0)), write("Résol IE \n"),  complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
 resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls),  not(length(Li,0)), write("Résol AND \n"), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
@@ -306,14 +306,15 @@ transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- write("====transfor
                                                              resolution(Lie2,Lpt2,Li2,Lu2,Ls2,Abr).
 
 
-presence_all(A,B,Lpt,Abr):- member(A, Lpt), member(B, Abr).
+presence_all((I,B,R),Abr):- member((I,B,R), Abr),!.
 
 
-%deduction_all(_,[],_,_,_,_).
-deduction_all(Lie,Lpt,Li,Lu,Ls,Abr) :- write("====deduction all===\n"),presence_all((I,all(R,C)),(I,B,R),Lpt,Abr), /*on teste la presence d'un (I,all(R,C)) dans Lpt et d'un (I,B,R) dans Abr*/
-                                       evolue((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
-                                       % (affiche_evolution_Abox(Ls, Lie, Lpt, Li,Lu, Abr, Ls1,Lie1,Lpt1,Li1,Lu1,AbrNew1),
-                                       resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
+deduction_all(Lie,[(I,all(R,C))|Lpt],Li,Lu,Ls,Abr) :- write("====deduction all===\n"),
+                                                      write(Ls),
+                                                      member((I,B,R),Abr),
+                                                      evolue((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
+                                                      write(Ls1),
+                                                      resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
 
 %transformation_or(_,_,_,[],_,_).
 transformation_or(Lie,Lpt,Li,[(I,or(C1,C2))|Tu],Ls,Abr) :- write("====transformation or===\n"),
