@@ -10,6 +10,7 @@ equiv(parent,and(personne,some(aEnfant,anything))).
 
 cnamea(personne).
 cnamea(livre).
+
 cnamea(objet).
 cnamea(sculpture).
 cnamea(anything).

@@ -181,7 +181,6 @@ nnf(all(R,C),all(R,NC)) :- nnf(C,NC),!.
 nnf(X,X).
 
 
-
 /* Verification syntaxique et semantique */
 concept([not(C)|_]) :- concept([C]),!.
 concept([and(C1,C2)|_]) :- concept([C1]),concept([C2]),!.
@@ -233,7 +232,7 @@ ajout2((C1traite,C2traite),Abi,Abi1) :- genere(Nom),
 /* PARTIE 3 : DEMONSTRATION DE LA PROPOSITION */
 
 troisieme_etape(Abi,Abr) :- tri_Abox(Abi,Lie,Lpt,Li,Lu,Ls),
-                            resolution(Lie,Lpt,Li,Lu,Ls,Abr),
+                            \+ resolution(Lie,Lpt,Li,Lu,Ls,Abr),
                             nl, write('Youpiiiiii, on a demontre la proposition initiale !!!').
 
 tri_Abox([],[],[],[],[],[]). /*cas d'arrêt*/
@@ -244,22 +243,6 @@ tri_Abox([(I,or(C1,C2))|T],Lie,Lpt,Li,LuNew,Ls) :- concatene([(I,or(C1,C2))],Lu,
 tri_Abox([(I,not(C))|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,not(C))],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*not(concept) -> Ls*/
 tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,C)],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*concept -> Ls*/      
 
-resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- write("Test de clash dans:\n"),
-                                    affiche(Ls),
-                                    test_clash(Ls),
-                                    complete_some(Lie,Lpt,Li,Lu,Ls,Abr), /*règle il existe*/
-                                    transformation_and(Lie,Lpt,Li,Lu,Ls,Abr), /*règle et*/
-                                    deduction_all(Lie,Lpt,Li,Lu,Ls,Abr), /*règle pour tout*/
-                                    transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
-
-/*evolue/11 : màj des listes de Abe*/
-evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,some(R,C))],Lie,Lie1),!.
-evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,and(C1,C2))],Li,Li1),!.
-evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
-evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
-evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,not(C))],Ls,Ls1),!.
-evolue((I,C),_,_,_,_,Ls,_,_,_,_,Ls1) :- concatene([(I,C)],Ls,Ls1),!.
-
 /*affiche/1: predicat qui affiche une liste d'assertions*/
 affiche([]):- write("fin affichage.\n").
 affiche([(I,some(R,C))|T]) :- write("("), write(I),write(" : "),write("∃"),write(R), write("."), write(C),write(") , "), affiche(T),!.
@@ -268,7 +251,6 @@ affiche([(I,and(C1,C2))|T]) :- write("("),write(I), write(" : "), write(C1), wri
 affiche([(I,or(C1,C2))|T]) :- write("("),write(I), write(" : "), write(C1), write(" ⊔ "), write(C2),write(") , "), affiche(T),!.
 affiche([(I,not(C))|T]) :- write("("),write(I), write(" : "), write("¬ "), write(C),write(") , "), affiche(T),!.
 affiche([(I,C)|T]) :- write("("),write(I),write(" : "),write(C),write(") , "), affiche(T),!.
-
 
 
 /*affiche_evolution_Abox/12 : Affiche l'évolution de la Abox étendue*/
@@ -290,41 +272,53 @@ affiche_evolution_Abox(Ls1, Lie1, Lpt1, Li1, Lu1 ,Abr1, Ls2, Lie2, Lpt2, Li2, Lu
                                                                                            affiche(Abr2),
                                                                                            write("=======FIN========"),nl.
 
-
 /*TODO : test_clash/1 : predicat qui vaut vrai s'il n'y a pas de clash */
 test_clash(L):- test_clash_rec(L,L).
 test_clash_rec([],L). % cas de base
-test_clash_rec([(I,C)|T], L) :- nnf(not(C),Neg), nonmember((I, Neg), L), test_clash(T).
+test_clash_rec([(I,C)|T], L) :- nnf(not(C),Neg), nonmember((I, Neg), L), test_clash_rec(T,L).
 
-complete_some([],_,_,_,_,_).
-complete_some([(I,some(R,C))|Tie],Lpt,Li,Lu,Ls,Abr) :- genere(B), /*on cree un nouvel objet B*/
-                                                       concatene([(I,(B,R))],Abr,AbrNew), /*on ajoute (I,B,R) dans Abr*/
+resolution([],[],[],[],Ls,Abr) :- \+ test_clash(Ls).
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), complete_some(Lie,Lpt,Li,Lu,Ls,Abr). /*règle il existe*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), transformation_and(Lie,Lpt,Li,Lu,Ls,Abr). /*règle et*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), deduction_all(Lie,Lpt,Li,Lu,Ls,Abr). /*règle pour tout*/
+resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- test_clash(Ls), transformation_or(Lie,Lpt,Li,Lu,Ls,Abr). /*règle ou*/
+
+
+/*evolue/11 : màj des listes de Abe*/
+evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,some(R,C))],Lie,Lie1),!.
+evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,and(C1,C2))],Li,Li1),!.
+evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
+evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
+evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- concatene([(I,not(C))],Ls,Ls1),!.
+evolue((I,C),_,_,_,_,Ls,_,_,_,_,Ls1) :- concatene([(I,C)],Ls,Ls1),!.
+
+
+%complete_some([],Lpt,Li,Lu,Ls,Abr).
+complete_some([(I,some(R,C))|Tie],Lpt,Li,Lu,Ls,Abr) :- write("====complete some===\n"),
+                                                       genere(B), /*on cree un nouvel objet B*/
+                                                       concatene([(I,B,R)],Abr,AbrNew), /*on ajoute (I,B,R) dans Abr*/
                                                        evolue((B,C),Tie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1), /*l'ajout de (B,C) depend de la nature de C*/
-                                                       test_clash(Ls1), /*on regarde s'il y a un clash*/
-                                                       resolution(Lie1,Lpt1,Li1,Lu1,Ls1,AbrNew). /*s'il n'y a pas de clash, on boucle*/
+                                                       resolution(Lie1,Lpt1,Li1,Lu1,Ls1,AbrNew). /*on boucle*/
 
-transformation_and(_,_,[],_,_,_).
-transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- write("transformation and"),
+%transformation_and(_,_,[],_,_,_).
+transformation_and(Lie,Lpt,[(I,and(C1,C2))|Ti],Lu,Ls,Abr) :- write("====transformation and===\n"),
                                                              evolue((I,C1),Lie,Lpt,Ti,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
                                                              evolue((I,C2),Lie1,Lpt1,Li1,Lu1,Ls1,Lie2,Lpt2,Li2,Lu2,Ls2),
-                                                             test_clash(Ls1),
                                                              resolution(Lie2,Lpt2,Li2,Lu2,Ls2,Abr).
 
-/*TODO : définir presence_all*/
+
 presence_all(A,B,Lpt,Abr):- member(A, Lpt), member(B, Abr).
 
-deduction_all(_,[],_,_,_,_).
-deduction_all(Lie,Lpt,Li,Lu,Ls,Abr) :- write("deduction all"), presence_all((I,all(R,C)),(I,B,R),Lpt,Abr), /*on teste la presence d'un (I,all(R,C)) dans Lpt et d'un (I,B,R) dans Abr*/
+
+%deduction_all(_,[],_,_,_,_).
+deduction_all(Lie,Lpt,Li,Lu,Ls,Abr) :- write("====deduction all===\n"),presence_all((I,all(R,C)),(I,B,R),Lpt,Abr), /*on teste la presence d'un (I,all(R,C)) dans Lpt et d'un (I,B,R) dans Abr*/
                                        evolue((B,C),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),
                                        % (affiche_evolution_Abox(Ls, Lie, Lpt, Li,Lu, Abr, Ls1,Lie1,Lpt1,Li1,Lu1,AbrNew1),
-                                       test_clash(Ls1),
                                        resolution(Lie1,Lpt1,Li1,Lu1,Ls1,Abr).
 
-transformation_or(_,_,_,[],_,_).
-transformation_or(Lie,Lpt,Li,[(I,or(C1,C2))|Tu],Ls,Abr) :- write("\n transformation or "),
+%transformation_or(_,_,_,[],_,_).
+transformation_or(Lie,Lpt,Li,[(I,or(C1,C2))|Tu],Ls,Abr) :- write("====transformation or===\n"),
                                                            evolue((I,C1),Lie,Lpt,Li,Tu,Ls,Lie1g,Lpt1g,Li1g,Lu1g,Ls1g), /*ajout fils gauche*/
                                                            evolue((I,C2),Lie,Lpt,Li,Tu,Ls,Lie1d,Lpt1d,Li1d,Lu1d,Ls1d), /*ajout fils droit*/
-                                                           test_clash(Ls1g),
-                                                           test_clash(Ls1d),
                                                            resolution(Lie1g,Lpt1g,Li1g,Lu1g,Ls1g,Abr), /*fils gauche*/
                                                            resolution(Lie1d,Lpt1d,Li1d,Lu1d,Ls1d,Abr). /*fils droit*/
