@@ -50,5 +50,5 @@ instR(vinci,joconde,aCree).
   - assertions de concepts :
 [(michelAnge,personne), (david,sculpture), (sonnets,livre), (vinci,personne), (joconde,objet)]
   - assertions de rôles :
-  [(michelAnge, david, aCree), (michelAnge, sonnet, aEcrit),(vinci, joconde, aCree)]
+  [(michelAnge, david, aCree), (michelAnge, sonnets, aEcrit),(vinci, joconde, aCree)]
 */
