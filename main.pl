@@ -11,9 +11,9 @@ nonmember(Arg,[Arg|_]) :- !,fail.
 nonmember(Arg,[_|Tail]) :- !, nonmember(Arg,Tail).
 nonmember(_,[]).
 
-/*concat/3 : concatene les deux listes L1 et L2 dans L3.*/
-concatene([],L1,L1).
-concatene([X|Y],L1,[X|L2]) :- concatene(Y,L1,L2).
+/*concat/3 : concat les deux listes L1 et L2 dans L3.*/
+concat([],L1,L1).
+concat([X|Y],L1,[X|L2]) :- concat(Y,L1,L2).
 
 /*enleve/3 : supprime  X  de  la  liste  L1  et  renvoie  la  liste  résultante  dans  L2.*/
 enleve(X,[X|L],L) :-!.
@@ -23,7 +23,7 @@ generer(B):- random(10,100000,B).
 
 /*genere/1 : génère un nouvel identificateur qui est fourni en sortie dans Nom.*/
 genere(Nom) :- compteur(V),nombre(V,L1),
-               concatene([105,110,115,116],L1,L2),
+               concat([105,110,115,116],L1,L2),
                V1 is V+1,
                dynamic(compteur/1),
                retract(compteur(V)),
@@ -37,7 +37,7 @@ nombre(X,L1) :- R is (X mod 10),
                 chiffre_car(R,R1),
                 char_code(R1,R2),
                 nombre(Q,L),
-                concatene(L,[R2],L1).
+                concat(L,[R2],L1).
 chiffre_car(0,'0').
 chiffre_car(1,'1').
 chiffre_car(2,'2').
@@ -210,7 +210,7 @@ correction([I|C]) :- iname(I),concept(C).
 traitement([I|C],(I,Ctraitennf)) :- remplace_concepts_complexes(C,Ctraite),
                                     nnf(not(Ctraite),Ctraitennf).
 
-ajout(Ptraitennf,Abi,Abi1) :- concatene([Ptraitennf],Abi,Abi1).
+ajout(Ptraitennf,Abi,Abi1) :- concat([Ptraitennf],Abi,Abi1).
 
 
 acquisition_prop_type2(Abi,Abi1,Tbox) :-
@@ -229,7 +229,7 @@ traitement2([C1|C2],(C1traite,C2traite)) :- remplace_concepts_complexes([C1],C1t
                                             traitement2(C2,(C1traite,C2traite)).
 
 ajout2((C1traite,C2traite),Abi,Abi1) :- genere(Nom),
-                                        concatene([(Nom,and(C1traite,C2traite))],Abi,Abi1).
+                                        concat([(Nom,and(C1traite,C2traite))],Abi,Abi1).
 
 
 /* PARTIE 3 : DEMONSTRATION DE LA PROPOSITION */
@@ -240,12 +240,12 @@ troisieme_etape(Abi,Abr) :- tri_Abox(Abi,Lie,Lpt,Li,Lu,Ls),
                             nl, write('Youpiiiiii, on a demontre la proposition initiale !!!').
 
 tri_Abox([],[],[],[],[],[]). /*cas d'arrêt*/
-tri_Abox([(I,some(R,C))|T],LieNew,Lpt,Li,Lu,Ls) :- concatene([(I,some(R,C))],Lie,LieNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*some -> Lie*/
-tri_Abox([(I,all(R,C))|T],Lie,LptNew,Li,Lu,Ls) :- concatene([(I,all(R,C))],Lpt,LptNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*all -> Lpt*/
-tri_Abox([(I,and(C1,C2))|T],Lie,Lpt,LiNew,Lu,Ls) :- concatene([(I,and(C1,C2))],Li,LiNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*and -> Li*/
-tri_Abox([(I,or(C1,C2))|T],Lie,Lpt,Li,LuNew,Ls) :- concatene([(I,or(C1,C2))],Lu,LuNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*or -> Lu*/
-tri_Abox([(I,not(C))|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,not(C))],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*not(concept) -> Ls*/
-tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,LsNew) :- concatene([(I,C)],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*concept -> Ls*/
+tri_Abox([(I,some(R,C))|T],LieNew,Lpt,Li,Lu,Ls) :- concat([(I,some(R,C))],Lie,LieNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*some -> Lie*/
+tri_Abox([(I,all(R,C))|T],Lie,LptNew,Li,Lu,Ls) :- concat([(I,all(R,C))],Lpt,LptNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*all -> Lpt*/
+tri_Abox([(I,and(C1,C2))|T],Lie,Lpt,LiNew,Lu,Ls) :- concat([(I,and(C1,C2))],Li,LiNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*and -> Li*/
+tri_Abox([(I,or(C1,C2))|T],Lie,Lpt,Li,LuNew,Ls) :- concat([(I,or(C1,C2))],Lu,LuNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*or -> Lu*/
+tri_Abox([(I,not(C))|T],Lie,Lpt,Li,Lu,LsNew) :- concat([(I,not(C))],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*not(concept) -> Ls*/
+tri_Abox([(I,C)|T],Lie,Lpt,Li,Lu,LsNew) :- concat([(I,C)],Ls,LsNew), tri_Abox(T,Lie,Lpt,Li,Lu,Ls),!. /*concept -> Ls*/
 
 /*affiche/1: predicat qui affiche une liste d'assertions*/
 affiche([]).
@@ -265,14 +265,14 @@ affiche(some(R,C)) :- write("∃"), write(R), write("."), affiche(C).
 affiche(not(C)) :- write("¬"),affiche(C).
 affiche(C) :- write(C).
 /*affiche_evolution_Abox/12 : Affiche l'évolution de la Abox étendue*/
-affiche_evolution_Abox(Ls, Lie, Lpt, Li, Lu, Abr, Ls1, Lie1, Lpt1, Li1, Lu1, Abr1) :- write("---État de départ de la Abox---"),nl,
+affiche_evolution_Abox(Ls, Lie, Lpt, Li, Lu, Abr, Ls1, Lie1, Lpt1, Li1, Lu1, Abr1) :- write("---État de départ de la Abox---"),
                                                                                       affiche(Ls),
                                                                                       affiche(Lie),
                                                                                       affiche(Lpt),
                                                                                       affiche(Li),
                                                                                       affiche(Lu),
                                                                                       affiche(Abr),
-                                                                                      nl,write("---Etat d'arrivée---"),nl,
+                                                                                      nl,nl,write("---Etat d'arrivée---"),
                                                                                       affiche(Ls1),
                                                                                       affiche(Lie1),
                                                                                       affiche(Lpt1),
@@ -293,18 +293,18 @@ resolution(Lie,Lpt,Li,Lu,Ls,Abr) :- not(length(Lu,0)), test_clash(Ls), write("\n
 resolution([],[],[],[],Ls,Abr) :- not(test_clash(Ls)), write("\nBranche fermée !!\n").
 
 /*evolue/11 : màj des listes de Abe*/
-evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt,Li,Lu,Ls) :- concatene([(I,some(R,C))],Lie,Lie1),!.
-evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li1,Lu,Ls) :- concatene([(I,and(C1,C2))],Li,Li1),!.
-evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu1,Ls) :- concatene([(I,or(C1,C2))],Lu,Lu1),!.
-evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt1,Li,Lu,Ls) :- concatene([(I,all(R,C))],Lpt,Lpt1),!.
-evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1) :- cnamea(C), concatene([(I,not(C))],Ls,Ls1),!. /*si C est un concept atomique, on ajoute dans Ls*/
+evolue((I,some(R,C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt,Li,Lu,Ls) :- concat([(I,some(R,C))],Lie,Lie1),!.
+evolue((I,and(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li1,Lu,Ls) :- concat([(I,and(C1,C2))],Li,Li1),!.
+evolue((I,or(C1,C2)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu1,Ls) :- concat([(I,or(C1,C2))],Lu,Lu1),!.
+evolue((I,all(R,C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt1,Li,Lu,Ls) :- concat([(I,all(R,C))],Lpt,Lpt1),!.
+evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1) :- cnamea(C), concat([(I,not(C))],Ls,Ls1),!. /*si C est un concept atomique, on ajoute dans Ls*/
 evolue((I,not(C)),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1) :- not(cnamea(C)), nnf(not(C),NotCnnf), evolue((I,NotCnnf),Lie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1),!. /*sinon, on prend le nnf pour le mettre dans la bonne liste*/
-evolue((I,C),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1):- concatene([(I,C)],Ls,Ls1),!.
+evolue((I,C),Lie,Lpt,Li,Lu,Ls,Lie,Lpt,Li,Lu,Ls1):- concat([(I,C)],Ls,Ls1),!.
 
 
 
 complete_some([(I,some(R,C))|Tie],Lpt,Li,Lu,Ls,Abr) :- generer(B), /*on cree un nouvel objet B*/
-                                                       concatene([(I,B,R)],Abr,AbrNew), /*on ajoute (I,B,R) dans Abr*/
+                                                       concat([(I,B,R)],Abr,AbrNew), /*on ajoute (I,B,R) dans Abr*/
                                                        evolue((B,C),Tie,Lpt,Li,Lu,Ls,Lie1,Lpt1,Li1,Lu1,Ls1), /*l'ajout de (B,C) depend de la nature de C*/
                                                        affiche_evolution_Abox(Ls,[(I,some(R,C))|Tie], Lpt, Li, Lu ,Abr, Ls1, Lie1, Lpt1, Li1, Lu1, AbrNew),
                                                        resolution(Lie1,Lpt1,Li1,Lu1,Ls1,AbrNew). /*on boucle*/
