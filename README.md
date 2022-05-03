@@ -1,6 +1,6 @@
 # Projet-LRC
 Projet en LRC, M1 Informatique, Sorbonne Université.
 
+Ecriture en Prolog d’un démonstrateur basé sur l’algorithme des tableaux pour la logique de description ALC
 
-# Lien du rapport:
-Lien d'invitation Overleaf: https://www.overleaf.com/6597128191mttyxspsrwwx
+Note : 15/20
